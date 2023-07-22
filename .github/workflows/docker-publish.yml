@@ -17,13 +17,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup buildx
+        run: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker buildx create --name cross-builder --platform linux/arm64,linux/amd64
+
       - name: Run tests
         run: |
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
           else
-            docker buildx build --progress=plain --file Dockerfile .
+            docker buildx build --builder cross-builder --platform linux/amd64,linux/arm64 --progress=plain --file Dockerfile .
           fi
 
   push:
@@ -35,11 +40,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build image
-        run: docker buildx build --progress=plain --file Dockerfile --tag $IMAGE_NAME .
-
       - name: Log into registry
         run: echo "${{ secrets.QUAY_TOKEN }}" | docker login quay.io -u seiferma+github --password-stdin
+
+      - name: Setup buildx
+        run: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker buildx create --name cross-builder --platform linux/arm64,linux/amd64
 
       - name: Push image
         run: |
@@ -60,6 +67,6 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker buildx build --builder cross-builder --platform linux/amd64,linux/arm64 --progress=plain --file Dockerfile --tag $IMAGE_ID:$VERSION --push .
+
 
