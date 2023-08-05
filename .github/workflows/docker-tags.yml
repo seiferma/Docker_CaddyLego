@@ -1,9 +1,9 @@
-name: Docker
+name: Docker Tags
 
 on:
   push:
     tags:
-  pull_request:
+      - '*'
 
 jobs:
   build-and-push:
