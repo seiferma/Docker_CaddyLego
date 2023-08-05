@@ -1,9 +1,8 @@
-name: Docker
+name: Docker Nightly
 
 on:
-  push:
-    tags:
-  pull_request:
+  schedule:
+    - cron:  '0 5 * * *'
 
 jobs:
   build-and-push:
@@ -12,6 +11,9 @@ jobs:
       registry-host: quay.io
       image-name: seiferma/caddy-lego
       platforms: linux/amd64,linux/arm64
+      tag: stable
+      build-args: |
+        CADDY_VERSION=latest
     secrets:
       registry-user: seiferma+github
       registry-password: ${{ secrets.QUAY_TOKEN }}
