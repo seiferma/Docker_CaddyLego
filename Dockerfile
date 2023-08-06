@@ -20,8 +20,8 @@ FROM scratch
 ENV XDG_CONFIG_HOME /config
 ENV XDG_DATA_HOME /data
 
-COPY --from=builder /go/caddy /bin/caddy
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /tmp/empty /etc/caddy/Caddyfile
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /go/caddy /bin/caddy
 
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
