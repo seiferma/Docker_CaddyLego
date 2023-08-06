@@ -1,13 +1,13 @@
 FROM --platform=$BUILDPLATFORM golang:alpine AS builder
 
 ARG TARGETARCH
-ARG CADDY_VERSION=v2.6.4
+ARG CADDY_VERSION=latest
 ARG GOOS=linux
 ARG CGOENABLED=0
 
 RUN apk add --no-cache git
-RUN GOARCH=$TARGETARCH && \
-    go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest && \
+RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@$CADDY_VERSION
+RUN export GOARCH=$TARGETARCH && \
     xcaddy build --with github.com/caddy-dns/lego-deprecated
 RUN apk add --no-cache libcap
 RUN setcap cap_net_bind_service=+ep /go/caddy
